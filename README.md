@@ -1,19 +1,14 @@
 # Ewc
 
-**TODO: Add description**
+Word count written in elixir.
 
-## Installation
+## Build
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `ewc` to your list of dependencies in `mix.exs`:
+Build this project with `mix escript.build`.
+The `ewc` binary will be generated in the project folder.
 
-```elixir
-def deps do
-  [{:ewc, "~> 0.1.0"}]
-end
-```
+## Run ewc
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/ewc](https://hexdocs.pm/ewc).
+Run the tool like any other CLI tool. Ewc supports the parameters --lines (-l), --words (-w) and --chars (-m).
 
+eg: `./ewc -lw yourfile.txt`
