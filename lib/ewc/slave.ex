@@ -8,12 +8,10 @@ defmodule Ewc.Slave do
     |> reduce_result
   end
 
-  defp count_lines(file_stream) do
-    Enum.map(file_stream, &process_line/1)
-  end
+  defp count_lines(file_stream), do: Stream.map(file_stream, &process_line/1)
 
-  defp reduce_result(result_list) do
-    Enum.reduce(result_list, @initial_state, fn(curr, acc) ->
+  defp reduce_result(result) do
+    Enum.reduce(result, @initial_state, fn(curr, acc) ->
       acc
       |> Map.merge(curr, fn(_key, v1, v2) -> v1 + v2 end)
       |> Map.update!(:lines, fn v -> v + 1 end)
@@ -21,16 +19,11 @@ defmodule Ewc.Slave do
   end
 
   defp process_line(line) do
-    result = %{}
-
-    result
+    %{}
     |> add_char_count(line)
     |> add_word_count(line)
   end
 
-  defp add_char_count(result, line), do: Map.put(result, :chars, count_chars(line))
-  defp count_chars(line), do: String.length(line)
-
-  defp add_word_count(result, line), do: Map.put(result, :words, count_words(line))
-  defp count_words(line), do: line |> String.split |> Enum.count
+  defp add_char_count(result, line), do: Map.put(result, :chars, String.length(line))
+  defp add_word_count(result, line), do: Map.put(result, :words, line |> String.split |> Enum.count)
 end

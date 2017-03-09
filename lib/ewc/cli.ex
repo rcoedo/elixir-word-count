@@ -3,52 +3,39 @@ defmodule Ewc.CLI do
 
   @aliases [m: :chars, l: :lines, w: :words]
   @switches [chars: :boolean, lines: :boolean, words: :boolean]
-  @default_opts [lines: true, words: true, chars: true]
-  @empty_opts [lines: false, words: false, chars: false]
+  @default_flags [lines: true, words: true, chars: true]
+  @empty_flags [lines: false, words: false, chars: false]
 
   def main(args) do
-    {flags, files, _invalid} = parse_args(args)
-    opts = merge_defaults(flags)
+    {flags, files, _invalid} =
+      args
+      |> parse_args
+      |> process_args
 
     files
     |> process_files
-    |> print_output(opts)
+    |> print_output(flags)
   end
 
-  defp merge_defaults([]), do: @default_opts
-  defp merge_defaults(flags), do: Keyword.merge(@empty_opts, flags)
+  defp parse_args(args), do: OptionParser.parse(args, aliases: @aliases, switches: @switches)
+  defp process_args({flags, files, invalid}), do: {merge_defaults(flags), files, invalid}
 
-  defp parse_args(args) do
-    args
-    |> OptionParser.parse(aliases: @aliases, switches: @switches)
-  end
+  defp merge_defaults([]), do: @default_flags
+  defp merge_defaults(flags), do: Keyword.merge(@empty_flags, flags)
 
-  defp process_files(files) do
-    sizes = Master.count(files)
-    total = calculate_total(sizes)
+  defp process_files(files), do: Master.count(files)
 
-    {sizes, total}
-  end
-
-  defp calculate_total(sizes) do
-    sizes
-    |> Enum.map(fn {_file, size} -> size end)
-    |> Enum.reduce(%{}, fn (acc, curr) ->
-      Map.merge(acc, curr, fn(_key, v1, v2) -> v1 + v2 end)
-    end)
-  end
-
-  defp print_line({tag, %{lines: lines, words: words, chars: chars}}, opts) do
-    if Keyword.get(opts, :lines), do: IO.write "\t#{lines}"
-    if Keyword.get(opts, :words), do: IO.write "\t#{words}"
-    if Keyword.get(opts, :chars), do: IO.write "\t#{chars}"
+  defp print_line({tag, %{lines: lines, words: words, chars: chars}}, flags) do
+    if Keyword.get(flags, :lines), do: IO.write "\t#{lines}"
+    if Keyword.get(flags, :words), do: IO.write "\t#{words}"
+    if Keyword.get(flags, :chars), do: IO.write "\t#{chars}"
     IO.puts "\t#{tag}"
   end
 
-  defp print_output({sizes, total}, opts) do
-    Enum.map(sizes, fn(size) -> print_line(size, opts) end)
+  defp print_output({sizes, total}, flags) do
+    Enum.map(sizes, fn(size) -> print_line(size, flags) end)
     if Enum.count(sizes) > 1 do
-      print_line({"total", total}, opts)
+      print_line({"total", total}, flags)
     end
   end
 end
