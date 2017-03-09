@@ -20,6 +20,6 @@ defmodule Ewc.Mixfile do
   end
 
   defp deps do
-    []
+    [{:mix_test_watch, "~> 0.3", only: :dev, runtime: false}]
   end
 end
