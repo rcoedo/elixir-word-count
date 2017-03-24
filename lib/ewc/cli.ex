@@ -7,14 +7,16 @@ defmodule Ewc.CLI do
   @empty_flags [lines: false, words: false, chars: false]
 
   def main(args) do
-    {flags, files, _invalid} =
+    options =
       args
       |> parse_args
       |> process_args
 
-    files
-    |> process_files
-    |> print_output(flags)
+    case options do
+      {flags, [], _invalid} -> print_help()
+      {flags, files, []}-> process_files(files, flags)
+      _ -> print_help()
+    end
   end
 
   defp parse_args(args), do: OptionParser.parse(args, aliases: @aliases, switches: @switches)
@@ -23,7 +25,11 @@ defmodule Ewc.CLI do
   defp merge_defaults([]), do: @default_flags
   defp merge_defaults(flags), do: Keyword.merge(@empty_flags, flags)
 
-  defp process_files(files), do: Master.count(files)
+  defp process_files(files, flags) do
+    files
+    |> Master.count
+    |> print_output(flags)
+  end
 
   defp print_line({tag, %{lines: lines, words: words, chars: chars}}, flags) do
     if Keyword.get(flags, :lines), do: IO.write "\t#{lines}"
@@ -37,5 +43,9 @@ defmodule Ewc.CLI do
     if Enum.count(sizes) > 1 do
       print_line({"total", total}, flags)
     end
+  end
+
+  defp print_help do
+    IO.puts "ewc usage: ewc [-lmw] [file ...]"
   end
 end
